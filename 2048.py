@@ -7,10 +7,8 @@
 # Description: Helps the user achieve a high score in a real game of 2048 by using a move searcher.
 #              This Script initialize the AI and controls the game flow.
 
-
-#from __future__ import print_function
-
 import time
+import subprocess
 
 import heuristicai as ai #for task 4
 #import searchai as ai #for task 5
@@ -90,6 +88,14 @@ def main(argv):
         from chromectrl import ChromeDebuggerControl
         if args.port is None:
             args.port = 9222
+        # Start Chrome with remote debugging enabled
+        chrome_path = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"  # Update this path if necessary
+        subprocess.Popen([
+            chrome_path, 
+            f'--remote-debugging-port={args.port}', 
+            '--remote-allow-origins=*', 
+            'https://play2048.co/'
+        ])
         ctrl = ChromeDebuggerControl(args.port)
 
     if args.ctrlmode == 'keyboard':
@@ -111,3 +117,8 @@ if __name__ == '__main__':
     import sys
     from sys import exit 
     exit(main(sys.argv[1:]))
+    
+    
+    
+    
+    

@@ -1,6 +1,6 @@
 # AI 2048
 
-#Xiaomi Sensors Flash
+#Automatisierung vom Spiel 2048 über eine KI
 
 # 1 Install git 
 https://git-scm.com/download/win

@@ -14,7 +14,7 @@ https://tortoisegit.org/
 https://www.anaconda.com/download
 
 
-# install chrome Install Anaconda and add target path:
+# install chrome and add target path:
 
 #make link from chrome and add under settingst --> target 
 

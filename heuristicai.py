@@ -16,7 +16,7 @@ def find_best_move(board):
             #[ 4  2  4  2]
             #[ 2 16 64  4]
             #[ 8  4 16  2]]
-	
+	##
 	# TODO:
 	# Build a heuristic agent on your own that is much better than the random agent.
 	# Your own agent don't have to beat the game.

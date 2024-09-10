@@ -47,8 +47,8 @@ def heuristic(board):
     return (
         empty_tiles(board) * 4 +  # Belohne leere Felder stärker
         max_tile_in_corner(board) * 5 +  # Belohne hohe Kacheln in den Ecken
-        merge_potential(board) * 3 +  # Belohne potenzielle Merges
-        monotonicity_score(board) * 4  # Belohne monotone Anordnung der Kacheln
+        merge_potential(board) * 1 +  # Belohne potenzielle Merges
+        monotonicity_score(board) * 2  # Belohne monotone Anordnung der Kacheln
     )
 
 def empty_tiles(board):

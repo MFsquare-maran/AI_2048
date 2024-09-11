@@ -10,8 +10,8 @@
 import time
 import subprocess
 
-#import heuristicai as ai #for task 4
-import lu_searchai as ai #for task 5
+import heuristicai as ai #for task 4
+#import lu_searchai as ai #for task 5
 #import heuristicai_SOLUTION as ai #for task 4
 #import searchai_SOLUTION as ai #for task 5
 

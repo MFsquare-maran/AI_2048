@@ -35,7 +35,7 @@ def score_toplevel_move(move, board):
     if board_equals(board,newboard):
         return -1
     
-    return expectimax(newboard, 4, chance = True)
+    return expectimax(newboard, 5, chance = True)
     #return max(score)
 
 	# TODO:

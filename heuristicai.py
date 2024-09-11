@@ -25,10 +25,11 @@ def find_best_move_agent(board):
         newboard = execute_move(move, np.copy(board))
         
         if not board_equals(board, newboard):  # Überprüft, ob der Zug das Board verändert hat
-            score = heuristic(newboard)
+            score = heuristic(newboard,board,move)
             if score > bestscore:
                 bestscore = score
                 bestmove = move
+            print("Move Score" , bestscore)
     
     # Wenn kein gültiger Zug gefunden wurde (z.B. bei einem Game Over), wähle einen zufälligen Zug
     if bestmove == -1:
@@ -36,7 +37,7 @@ def find_best_move_agent(board):
         
     return bestmove
 
-def heuristic(board):
+def heuristic(newboard,board,move):
     """
     Bewertet das Board basierend auf mehreren Faktoren:
     - Anzahl der leeren Felder
@@ -44,29 +45,134 @@ def heuristic(board):
     - Potenzial für Merges
     - Monotonie der Anordnung
     """
+    
     return (
-        empty_tiles(board) * 4 +  # Belohne leere Felder stärker
-        max_tile_in_corner(board) * 5 +  # Belohne hohe Kacheln in den Ecken
-        merge_potential(board) * 1 +  # Belohne potenzielle Merges
-        monotonicity_score(board) * 2  # Belohne monotone Anordnung der Kacheln
+        (empty_tiles(newboard) * 7 +  # Belohne leere Felder stärker
+        max_tile_in_corner(newboard) * 10000  +  # Belohne hohe Kacheln in den Ecken
+        merge_potential(newboard) * 10 +  # Belohne potenzielle Merges
+        monotonicity_score(newboard) * 5 + # Belohne monotone Anordnung der Kacheln
+        stayleft(newboard) * 10000 +
+        forceleft(board,move) * 1 +
+        forceup(board,move) * 1
+        )
+        * down_allowed(newboard,move) * right_allowed(newboard,move) #prioleftup(move) * 100
+        
+
+         
     )
 
-def empty_tiles(board):
+"""
+forceleft(board,move) * 100000 +
+forceup(board,move) * 1000000
+"""
+"""
+def prioleftup(move):
+    
+    if move == UP or move == LEFT:
+        return 1
+    else:
+        return 0
+"""
+
+def forceleft(board,move):
+    score = 0
+    if move == LEFT:
+        if board[0][0] == board[0][1]:
+            score += board[0][0]
+            
+        if board[1][0] == board[1][1]:
+            score += board[1][0]
+        
+        if board[2][0] == board[2][1]:
+            score += board[2][0]
+            
+        if board[3][0] == board[3][1]:
+            score += board[3][0]
+        return score 
+    return 0
+            
+
+def forceup(board,move):
+    if move == UP:
+        if board[0][0] == board[1][0]:
+            return board[0][0]
+            
+        if board[1][0] == board[2][0]:
+            return board[1][0]
+        
+        if board[2][0] == board[3][0]:
+            return board[2][0]
+
+        return 0 
+    return 0
+        
+
+def stayleft(newboard):
+    
+    
+    # Maximalwert ermitteln
+    max_tile = np.max(newboard)
+
+    # Zweithöchste Zahl ermitteln
+    second_highest = np.max(newboard[newboard != max_tile])
+
+    # Dritthöchste Zahl ermitteln, indem du das Maximum und das Zweithöchste entfernst
+    try:
+        third_highest = np.max(newboard[(newboard != max_tile) & (newboard != second_highest)])
+    except:
+        third_highest = 0
+        
+    if newboard[1][0] == second_highest:
+        if newboard[2][0] == third_highest:
+            #return second_highest+third_highest
+            return 2
+            
+        #return second_highest
+        return 1
+    
+    return 0
+
+
+    
+def down_allowed(newboard, move):
+    if move == DOWN:
+        for i in range(3):
+            if newboard[0][i] == 0:
+                return 0
+            else:
+                return 1
+    else:
+        return 1
+def right_allowed(newboard, move):
+    if move == RIGHT:
+        for i in range(3):
+            if newboard[i][0] == 0:
+                return 0
+            else:
+                return 1
+    else:
+        return 1
+
+
+def empty_tiles(newboard):
     """
     Zählt die Anzahl der leeren Felder auf dem Board.
     """
-    return len(np.where(board == 0)[0])
+    return len(np.where(newboard == 0)[0])
 
-def max_tile_in_corner(board):
+def max_tile_in_corner(newboard):
     """
     Belohnt das Board, wenn die höchste Kachel in einer der vier Ecken liegt.
     """
-    max_tile = np.max(board)
-    if board[0][0] == max_tile:
+    max_tile = np.max(newboard)
+    if newboard[0][0] == max_tile:
         return max_tile
     return 0
 
-def merge_potential(board):
+
+
+
+def merge_potential(newboard):
     """
     Bewertet das Potenzial für Merges auf dem Board.
     - Gehe alle Reihen und Spalten durch und suche nach benachbarten Kacheln mit dem gleichen Wert.
@@ -74,13 +180,15 @@ def merge_potential(board):
     score = 0
     for i in range(4):
         for j in range(3):  # Bis 3, da wir nur benachbarte Kacheln vergleichen
-            if board[i][j] == board[i][j+1]:  # Horizontale Merges
-                score += board[i][j]
-            if board[j][i] == board[j+1][i]:  # Vertikale Merges
-                score += board[j][i]
+            if newboard[i][j] == newboard[i][j+1]:  # Horizontale Merges
+                score += newboard[i][j]
+                #score+= 1
+            if newboard[j][i] == newboard[j+1][i]:  # Vertikale Merges
+                score += newboard[j][i]
+                #score+= 1
     return score
 
-def monotonicity_score(board):
+def monotonicity_score(newboard):
     """
     Bewertet das Board basierend auf der Monotonie der Anordnung der Kacheln.
     Belohnt eine Anordnung, bei der die Kacheln von oben links nach unten rechts abnehmen.
@@ -89,14 +197,14 @@ def monotonicity_score(board):
     
     for i in range(3):  # Für die ersten 3 Zeilen
         for j in range(3):  # Für die ersten 3 Spalten
-            if board[i][j] >= board[i+1][j]:  # Vertikale Monotonie
-                score += board[i][j]
-            if board[i][j] >= board[i][j+1]:  # Horizontale Monotonie
-                score += board[i][j]
+            if newboard[i][j] >= newboard[i+1][j]:  # Vertikale Monotonie
+                #score += board[i][j]
+                score+= 1
+            if newboard[i][j] >= newboard[i][j+1]:  # Horizontale Monotonie
+                score+= 1
+                #score += board[i][j]
     
-    # Höhere Belohnung, wenn die größte Kachel oben links ist
-    if board[0][0] == np.max(board):
-        score += np.max(board) * 2
+
     
     return score
 

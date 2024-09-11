@@ -4,12 +4,20 @@ import sys
 import numpy as np
 import math
 
+
 # Author:      chrn (original by nneonneo)
 # Date:        11.11.2016
 # Copyright:   Algorithm from https://github.com/nneonneo/2048-ai
 # Description: The logic to beat the game. Based on expectimax algorithm.
+ground_depth = 4
 
-def find_best_move(board):
+
+
+def find_best_move(board,score):
+    """
+    find the best move for the next turn.
+    """
+    
     """
     find the best move for the next turn.
     """
@@ -17,7 +25,7 @@ def find_best_move(board):
     UP, DOWN, LEFT, RIGHT = 0, 1, 2, 3
     move_args = [UP,DOWN,LEFT,RIGHT]
     
-    result = [score_toplevel_move(i, board) for i in range(len(move_args))]
+    result = [score_toplevel_move(i, board,score) for i in range(len(move_args))]
     bestmove = result.index(max(result))
 
     for m in move_args:
@@ -25,17 +33,45 @@ def find_best_move(board):
 
     return bestmove
     
-def score_toplevel_move(move, board):
+def score_toplevel_move(move, board,total_score):
     """
     Entry Point to score the first move.
     """
+    depth = 1
+    
+
+    depth = int((count_unique_numbers(board))/2)
+    
+    if depth == 0:
+        depth = 1
+        
+        
+    print("Tiefe =", depth)
+    
+
     score = []
     newboard = execute_move(move, board)
 
     if board_equals(board,newboard):
         return -1
     
-    return expectimax(newboard, 5, chance = True)
+
+    return expectimax(newboard, depth, chance = True)
+
+
+
+def count_unique_numbers(matrix):
+    # Umwandlung der Matrix in eine flache Liste
+    flattened_matrix = np.array(matrix).flatten()
+    
+    # Verwende die Funktion 'np.unique', um die eindeutigen Werte zu zählen
+    unique_numbers = np.unique(flattened_matrix)
+    
+    return len(unique_numbers)
+
+def count_zeros(board):
+   
+    return len(np.where(board == 0)[0])
     #return max(score)
 
 	# TODO:
@@ -71,187 +107,48 @@ def board_equals(board, newboard):
     """
     return  (newboard == board).all()
 
-"""def score_board(board):
-
-    score = 0
-
-    # Weight matrices for tile position evaluation
-    position_weights = [
-        [32768, 16384, 8192, 4096],
-        [256, 512, 1024, 2048],
-        [128, 64, 32, 16],
-        [1, 2, 4, 8]
-    ]
-
-    # Weight matrix for monotonicity evaluation
-    monotonicity_weights = [
-        [0.125, 0.25, 0.5, 1],
-        [0.25, 0.5, 1, 2],
-        [0.5, 1, 2, 4],
-        [1, 2, 4, 8]
-    ]
-
-    # Calculate tile position score
-    for i in range(4):
-        for j in range(4):
-            if board[i][j] != 0:
-                score += board[i][j] * position_weights[i][j]
-
-    # Calculate monotonicity score
-    monotonicity_score = 0
-    for i in range(4):
-        for j in range(3):
-            if board[i][j] >= board[i][j + 1]:
-                monotonicity_score += board[i][j + 1] * monotonicity_weights[i][j]
-            if board[j][i] >= board[j + 1][i]:
-                monotonicity_score += board[j + 1][i] * monotonicity_weights[j][i]
-
-    # Calculate smoothness score
-    smoothness_score = 0
-    for i in range(4):
-        for j in range(3):
-            if board[i][j] != 0:
-                k = j + 1
-                while k < 4 and board[i][k] == 0:
-                    k += 1
-                if k < 4:
-                    smoothness_score -= abs(board[i][j] - board[i][k])
-
-    # Calculate the maximum tile value
-
-    # Final score calculation
-    score += monotonicity_score
-    score += smoothness_score
-
-    return score"""
-
-
 def score_board(board):
 
     score1 = 0
     r = 2
 
-    weights = np.array([[r**8, r**7, r**6, r**5], [r**1, r**2, r**3, r**4.9], [r**0, r**-1, r**-2, r**-3], [r**-7,r**-6 , r**-5, r**-4]])
+    # 82664 weights = np.array([[r**8, r**7, r**6, r**5], 
+                                #[r**1, r**2, r**3, r**4.9], 
+                                #[r**0, r**-1, r**-2, r**-3], 
+                                #[r**-7,r**-6 , r**-5, r**-4]])
+                                
+    weights = np.array([[r**15, r**1, r**0.9, r**-7],
+                        [r**7, r**2, r**-1, r**-6], 
+                        [r**6, r**3, r**-2, r**-5], 
+                        [r**5,r**4.9,r**-3, r**-3.1]])
 
+    # 69908 weights = np.array([[r**8,r**6,r**3,r**-1],
+                                #[r**7,r**4,r**0,r**-4],
+                                #[r**5,r**1,r**-3,r**-6],
+                                #[r**2,r**-2,r**-5,r**-7]])
 
-    return sum(np.multiply(board,weights).flatten())
+    # 25620 weights = np.array([[r**8,r**3.9,r**2.8,r**-0.5],
+                        #[r**7,r**4,r**3,r**0],
+                        #[r**6,r**5,r**2,r**1],
+                        #[r**4.9,r**4.8,r**3.8,r**-1]])
 
-"""
-def score_board(board):
-    # Define your evaluation parameters
-    # You can assign different weights to these parameters
-    empty_cells = np.count_nonzero(board == 0)
-    max_tile = np.max(board)
-    smoothness = calculate_smoothness(board)
-    snake_pattern = calculate_snake_pattern(board)
-    
-    # Define your weights for each parameter
-    weight_empty_cells = 100.0
-    weight_max_tile = 50.0
-    weight_smoothness = 1.0
-    weight_snake_pattern = 1.0
-    
-    # Calculate the final evaluation score
-    score = (empty_cells * weight_empty_cells) + (math.log2(max_tile) * weight_max_tile) + (smoothness * weight_smoothness) + (snake_pattern * weight_snake_pattern)
-    
+    return sum(np.multiply(board,weights).flatten())#+merge_potential(board)
+
+def merge_potential(newboard):
+    """
+    Bewertet das Potenzial für Merges auf dem Board.
+    - Gehe alle Reihen und Spalten durch und suche nach benachbarten Kacheln mit dem gleichen Wert.
+    """
+    score = 0
+    for i in range(4):
+        for j in range(3):  # Bis 3, da wir nur benachbarte Kacheln vergleichen
+            if newboard[i][j] == newboard[i][j+1]:  # Horizontale Merges
+                score += newboard[i][j]
+                #score+= 1
+            if newboard[j][i] == newboard[j+1][i]:  # Vertikale Merges
+                score += newboard[j][i]
+                #score+= 1
     return score
-
-# Helper function to calculate smoothness
-def calculate_smoothness(board):
-    smoothness = 0
-
-    # Check horizontal smoothness
-    for row in board:
-        for i in range(len(row) - 1):
-            if row[i] > 0 and row[i] == row[i + 1]:
-                smoothness += math.log2(row[i]) - 1
-
-    # Check vertical smoothness
-    for col in range(len(board[0])):
-        for i in range(len(board) - 1):
-            if board[i][col] > 0 and board[i][col] == board[i + 1][col]:
-                smoothness += math.log2(board[i][col]) - 1
-
-    return -smoothness  # We want to minimize smoothness
-
-# Helper function to calculate snake pattern
-def calculate_snake_pattern(board):
-    snake_pattern = 0
-    snake_head = None
-
-    for i in range(len(board)):
-        if i % 2 == 0:
-            for j in range(len(board[i])):
-                if snake_head is None:
-                    snake_head = (i, j)
-                else:
-                    row_diff = abs(snake_head[0] - i)
-                    col_diff = abs(snake_head[1] - j)
-                    snake_pattern += max(row_diff, col_diff)
-
-    return -snake_pattern  # We want to maximize the snake pattern
-
-
-"""
-"""
-def score_board(board):
-
-    #score the board
-
-    r = np.array([0.125**i for i in range(16)])
-    scores = []
-
-    for pos in [
-        [[0, 0], [0, 1], [0, 2], [0, 3],
-         [1, 3], [1, 2], [1, 1], [1, 0],
-         [2, 0], [2, 1], [2, 2], [2, 3],
-         [3, 3], [3, 2], [3, 1], [3, 0]],
-        [[0, 3], [0, 2], [0, 1], [0, 0],
-         [1, 0], [1, 1], [1, 2], [1, 3],
-         [2, 3], [2, 2], [2, 1], [2, 0],
-         [3, 0], [3, 1], [3, 2], [3, 3]],
-        [[3, 0], [2, 0], [1, 0], [0, 0],
-         [0, 1], [1, 1], [2, 1], [3, 1],
-         [3, 2], [2, 2], [1, 2], [0, 2],
-         [0, 3], [1, 3], [2, 3], [3, 3]],
-        [[3, 3], [2, 3], [1, 3], [0, 3],
-         [0, 2], [1, 2], [2, 2], [3, 2],
-         [3, 1], [2, 1], [1, 1], [0, 1],
-         [0, 0], [1, 0], [2, 0], [3, 0]]
-    ]:
-        sub_board = board[np.ix_([pos[i][0] for i in range(16)], [pos[i][1] for i in range(16)])]
-        scores.append(np.multiply(sub_board,r))
-
-    return np.max(scores)# + np.count_nonzero(board == 0) * 10
-"""
-""""
-def generate_boards(board):
-    
-    #add a 2 or 4 to all empty tiles
-    
-    newboards = []
-    for i in range(4):
-        for j in range(4):
-            if board[i][j] == 0:
-                newboard = board.copy()
-                newboard[i][j] = 2
-                newboards.append(execute_move(0,newboard))
-                newboards.append(execute_move(1,newboard))
-                newboards.append(execute_move(2,newboard))
-                newboards.append(execute_move(3,newboard))
-    
-    for i in range(4):
-        for j in range(4):
-            if board[i][j] == 0:
-                newboard = board.copy()
-                newboard[i][j] = 4
-                newboards.append(execute_move(0,newboard))
-                newboards.append(execute_move(1,newboard))
-                newboards.append(execute_move(2,newboard))
-                newboards.append(execute_move(3,newboard))
-
-    return newboards
-"""
 
 def expectimax(board, depth, chance=False):
     """
@@ -259,58 +156,38 @@ def expectimax(board, depth, chance=False):
     """
     max_score = 0
     if depth == 0:
-        return score_board(board)          #return whatever should be returned
+        return score_board(board)  # Blattknoten erreicht, also heuristischen Score berechnen
     
-    
-
-    if(chance == True):
+    if chance == True:
         expected_score = 0
         counter = 0
         for i in range(4):
             for j in range(4):
-                if board[i][j] == 0:
+                if board[i][j] == 0:  # Leeres Feld gefunden
                     newboard2 = board.copy()
-                    #newboard4 = board.copy()
-                    newboard2[i][j] = 2
-                    #newboard4[i][j] = 4
+                    newboard4 = board.copy()
+                    
+                    newboard2[i][j] = 2  # Setze eine 2 auf das leere Feld
+                    newboard4[i][j] = 4  # Setze eine 4 auf das leere Feld
+                    
+                    # Berechne den erwarteten Score unter Berücksichtigung der Wahrscheinlichkeiten
                     expected_score += (
-                        expectimax(newboard2, depth-1, chance= False)
-                        #0.1 * expectimax(newboard4, depth-1)
+                        0.9 * expectimax(newboard2, depth-1, chance=False) +  # 90% Wahrscheinlichkeit für 2
+                        0.1 * expectimax(newboard4, depth-1, chance=False)    # 10% Wahrscheinlichkeit für 4
                     )
                     counter += 1
-
-                    if expected_score/counter > max_score:
-                        max_score = expected_score/counter
-
-
-                    
-
-
-
-
-    elif(chance == False):
         
-        for i in range(4):
-            #board2 = board.copy()
+        if counter > 0:
+            return expected_score / counter  # Durchschnitt der erwarteten Scores
+        else:
+            return 0  # Kein leeres Feld verfügbar
+    
+    elif chance == False:  # Spielerzug
+        for i in range(4):  # Probiere jeden möglichen Zug (UP, DOWN, LEFT, RIGHT)
             moved_board = execute_move(i, board)
-            total_score = 0
-
-            if not board_equals(board, moved_board):
-                current_score = score_board(moved_board)
-
-                total_score = expectimax(moved_board, depth-1, chance = True)
-                
-                #future_score = expectimax(moved_board, depth-1, True)
-
-                #total_score += future_score
+            if not board_equals(board, moved_board):  # Nur wenn der Zug das Spielfeld verändert
+                total_score = expectimax(moved_board, depth-1, chance=True)  # Rekursiv weitermachen
                 if total_score > max_score:
                     max_score = total_score
 
     return max_score
-
-
-    
-    #print(newboards)
-
-    
-    

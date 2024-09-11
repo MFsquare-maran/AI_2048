@@ -10,8 +10,11 @@
 import time
 import subprocess
 
-import heuristicai as ai #for task 4
+#import heuristicai as ai #for task 4
+#import heuristicai_conv as ai #for task 4
 #import lu_searchai as ai #for task 5
+import searchai_V2 as ai #for task 5
+#import searchai as ai #for task 5
 #import heuristicai_SOLUTION as ai #for task 4
 #import searchai_SOLUTION as ai #for task 5
 
@@ -36,8 +39,8 @@ def _to_score(c):
 def to_score(m):
     return [[_to_score(c) for c in row] for row in m]
 
-def find_best_move(board):
-    return ai.find_best_move(board)
+def find_best_move(board,score):
+    return ai.find_best_move(board,score)
 
 def movename(move):
     return ['up', 'down', 'left', 'right'][move]
@@ -55,7 +58,7 @@ def play_game(gamectrl):
 
         moveno += 1
         board = gamectrl.get_board()
-        move = find_best_move(board)
+        move = find_best_move(board,gamectrl.get_score())
         if move < 0:
             break
         print("%010.6f: Score %d, Move %d: %s" % (time.time() - start, gamectrl.get_score(), moveno, movename(move)))

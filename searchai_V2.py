@@ -39,14 +39,21 @@ def score_toplevel_move(move, board,total_score):
     """
     depth = 1
     
-
-    depth = int((count_unique_numbers(board))/2)
+    amount_of_nummers = count_unique_numbers(board)
+    depth = int(((count_unique_numbers(board))/2)+0.5)
+    #depth = int(math.exp((amount_of_nummers-2) / 5.9)+1.5)
+    
     
     if depth == 0:
         depth = 1
-        
-        
+    
+    
+    
+    
+
+    print("unique nummer", amount_of_nummers)
     print("Tiefe =", depth)
+    
     
 
     score = []
@@ -117,10 +124,20 @@ def score_board(board):
                                 #[r**0, r**-1, r**-2, r**-3], 
                                 #[r**-7,r**-6 , r**-5, r**-4]])
                                 
-    weights = np.array([[r**15, r**1, r**0.9, r**-7],
+    # 161936 weights = np.array([[r**15, r**1, r**0.9, r**-7],
+                        #[r**7, r**2, r**-1, r**-6], 
+                        #[r**6, r**3, r**-2, r**-5], 
+                        #[r**5,r**4.9,r**-3, r**-3.1]])
+    
+    #129344 weights = np.array([[r**15, r**1, r**0.9, r**-7],
+                        #[r**10, r**2, r**-1, r**-6], 
+                        #[r**8, r**3, r**-2, r**-5], 
+                        #[r**5,r**4.9,r**-3, r**-3.1]])
+    
+    weights = np.array([[r**15, r**1, r**0, r**-7],
                         [r**7, r**2, r**-1, r**-6], 
                         [r**6, r**3, r**-2, r**-5], 
-                        [r**5,r**4.9,r**-3, r**-3.1]])
+                        [r**5,r**4.9,r**-3, r**-4]])
 
     # 69908 weights = np.array([[r**8,r**6,r**3,r**-1],
                                 #[r**7,r**4,r**0,r**-4],

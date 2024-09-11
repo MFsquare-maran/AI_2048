@@ -14,6 +14,7 @@ import subprocess
 #import heuristicai_conv as ai #for task 4
 #import lu_searchai as ai #for task 5
 import searchai_V2 as ai #for task 5
+#import searchai_fast_opt_V2 as ai #for task 5
 #import searchai as ai #for task 5
 #import heuristicai_SOLUTION as ai #for task 4
 #import searchai_SOLUTION as ai #for task 5

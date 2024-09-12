@@ -37,23 +37,33 @@ def score_toplevel_move(move, board,total_score):
     """
     Entry Point to score the first move.
     """
-    depth = 1
+    depth_1 = 0
+    depth_2 = 0
+    
+    depth_tot =0
     
     amount_of_nummers = count_unique_numbers(board)
-    depth = int(((count_unique_numbers(board))/2)+0.5)
+    depth_1 = int(((count_unique_numbers(board))/2)+0.5)
     #depth = int(math.exp((amount_of_nummers-2) / 5.9)+1.5)
     
+    depth_2 = int(10-count_zeros(board))
     
-    if depth == 0:
-        depth = 1
+    depth_tot = int((depth_2 + depth_1)/2)
+    
+    if depth_tot <= 3:
+        depth_tot = 3
+        
+    if depth_tot >= 8:
+        depth_tot = 8
     
     
     
     
 
     print("unique nummer", amount_of_nummers)
-    print("Tiefe =", depth)
-    
+    print("Tiefe1 =", depth_1)
+    print("Tiefe2 =",depth_2)
+    print("Tiefetot =", depth_tot)
     
 
     score = []
@@ -63,7 +73,7 @@ def score_toplevel_move(move, board,total_score):
         return -1
     
 
-    return expectimax(newboard, depth, chance = True)
+    return expectimax(newboard, depth_tot, chance = True)
 
 
 
@@ -124,20 +134,17 @@ def score_board(board):
                                 #[r**0, r**-1, r**-2, r**-3], 
                                 #[r**-7,r**-6 , r**-5, r**-4]])
                                 
-    # 161936 weights = np.array([[r**15, r**1, r**0.9, r**-7],
-                        #[r**7, r**2, r**-1, r**-6], 
-                        #[r**6, r**3, r**-2, r**-5], 
-                        #[r**5,r**4.9,r**-3, r**-3.1]])
+    weights = np.array([[r**15, r**1, r**0.9, r**-7],
+                        [r**7, r**2, r**-1, r**-6], 
+                        [r**6, r**3, r**-2, r**-5], 
+                        [r**5,r**4.9,r**-3, r**-3.1]])
     
     #129344 weights = np.array([[r**15, r**1, r**0.9, r**-7],
                         #[r**10, r**2, r**-1, r**-6], 
                         #[r**8, r**3, r**-2, r**-5], 
                         #[r**5,r**4.9,r**-3, r**-3.1]])
     
-    weights = np.array([[r**15, r**1, r**0, r**-7],
-                        [r**7, r**2, r**-1, r**-6], 
-                        [r**6, r**3, r**-2, r**-5], 
-                        [r**5,r**4.9,r**-3, r**-4]])
+   
 
     # 69908 weights = np.array([[r**8,r**6,r**3,r**-1],
                                 #[r**7,r**4,r**0,r**-4],
